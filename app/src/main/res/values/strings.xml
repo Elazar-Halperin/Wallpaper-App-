@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">WallpapaerApp_darkifyCopy</string>
+    <string name="wallpapers">Wallpapers</string>
+    <string name="favorites">Favorites</string>
+    <string name="share_app">Share app</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="exit">Exit</string>
+    <string name="welcome">Welcome</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+</resources>

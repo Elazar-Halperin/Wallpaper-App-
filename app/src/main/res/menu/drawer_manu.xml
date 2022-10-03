@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_wallpapers"
+            android:icon="@drawable/wallpaper_24px"
+            android:title="@string/wallpapers" />
+
+        <item
+            android:id="@+id/nav_favorites"
+            android:icon="@drawable/favorite_24"
+            android:title="@string/favorites" />
+
+        <item
+            android:id="@+id/nav_shareApp"
+            android:icon="@drawable/share_24px"
+            android:title="@string/share_app" />
+
+        <item
+            android:id="@+id/nav_privacyPolicy"
+            android:icon="@drawable/error_24px"
+            android:title="@string/privacy_policy" />
+
+        <item
+            android:id="@+id/nav_exit"
+            android:icon="@drawable/exit_24px"
+            android:title="@string/exit" />
+
+    </group>
+</menu>

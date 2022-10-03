@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:src="@drawable/shuffle_24px"
+    android:adjustViewBounds="true"
+    android:layout_gravity="center"
+    android:layout_margin="4dp"
+    android:scaleType="centerCrop">
+    <ImageView
+        android:id="@+id/iv_wallpaper"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_150sdp"
+        android:src="@drawable/shuffle_24px"
+        android:adjustViewBounds="true"
+        android:layout_gravity="center"
+        android:scaleType="centerCrop"/>
+</FrameLayout>
