@@ -113,6 +113,44 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return wallpapersList;
     }
 
+    public Wallpaper getWallpaperById(int id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Wallpaper wallpaper = null;
+
+        Cursor cursor = db.rawQuery("SELECT * FROM " + WALLPAPERS + " WHERE " + ID + "== " + id , null);
+
+        while(cursor.moveToNext()) {
+            int wallpaperId = cursor.getInt(0);
+            String url = cursor.getString(1);
+
+            wallpaper = (new Wallpaper(wallpaperId, url));
+        }
+        db.close();
+        cursor.close();
+
+        return wallpaper;
+    }
+
+    public List<Wallpaper> getAllFavorites() {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        List<Wallpaper> favorites = new ArrayList<>();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM " + FAVORITES, null);
+
+        while(cursor.moveToNext()) {
+//            int id = cursor.getInt(0);
+            int wallpaper_id = cursor.getInt(1);
+
+            favorites.add(getWallpaperById(wallpaper_id));
+        }
+        db.close();
+        cursor.close();
+
+        return favorites;
+    }
+
     public boolean isInFavorites(Wallpaper wallpaper) {
         SQLiteDatabase db = this.getReadableDatabase();
 

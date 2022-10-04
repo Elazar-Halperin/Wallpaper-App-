@@ -66,6 +66,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         database = new DatabaseHelper(getApplicationContext());
 
+
+        wallpaperList = database.getAllWallpapersShuffled();
+//        database.insertWallpaper(new Wallpaper(0, "https://wallpapercave.com/wp/wp5483004.jpg"));
+//        database.insertWallpaper(new Wallpaper(0, "https://wallpaperaccess.com/full/1489795.jpg"));
+//        database.insertWallpaper(new Wallpaper(0, "https://phonewallpaperhd.com/wp-content/uploads/2019/02/Liquid-Art-Wallpaper-For-Phone-HD.jpg"));
+        adapter = new RecyclerViewAdapter(getApplicationContext(), wallpaperList);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
+        rv_wallpapers.setAdapter(adapter);
+
+        setListeners();
+
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private void setListeners() {
+        fab_backToTop.setOnClickListener(v -> {
+            rv_wallpapers.smoothScrollToPosition(0);
+        });
+
+        fab_getRandomizeWallpaper.setOnClickListener(v -> {
+            Collections.shuffle(wallpaperList);
+            adapter.notifyDataSetChanged();
+        });
+
         final boolean[] isUp = {false};
 
         rv_wallpapers.setOnTouchListener(new View.OnTouchListener() {
@@ -92,24 +116,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 return false;
             }
-        });
-        wallpaperList = database.getAllWallpapersShuffled();
-        adapter = new RecyclerViewAdapter(getApplicationContext(), wallpaperList);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
-        rv_wallpapers.setAdapter(adapter);
-
-        setListeners();
-
-    }
-
-    private void setListeners() {
-        fab_backToTop.setOnClickListener(v -> {
-            rv_wallpapers.smoothScrollToPosition(0);
-        });
-
-        fab_getRandomizeWallpaper.setOnClickListener(v -> {
-            Collections.shuffle(wallpaperList);
-            adapter.notifyDataSetChanged();
         });
     }
 
@@ -191,6 +197,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_wallpapers:
                 break;
             case R.id.nav_favorites:
+                adapter.getFilter().filter("");
                 break;
             case R.id.nav_shareApp:
                 break;
