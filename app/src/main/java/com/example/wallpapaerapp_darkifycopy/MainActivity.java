@@ -17,6 +17,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
@@ -29,13 +32,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Toolbar toolbar;
     DrawerLayout drawer;
 
+    FloatingActionButton fab_backToTop, fab_getRandomizeWallpaper;
+
+    FrameLayout fl_container;
+
     RecyclerViewAdapter adapter;
     RecyclerView rv_wallpapers;
     List<Wallpaper> wallpaperList;
 
-    FloatingActionButton fab_backToTop, fab_getRandomizeWallpaper;
-
     DatabaseHelper database;
+
+    Animation anim_fromBottom;
+    Animation anim_toBottom;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -44,10 +52,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
 
         toolbar = findViewById(R.id.toolbar);
+
         drawer = findViewById(R.id.drawer_layout);
+
         rv_wallpapers = findViewById(R.id.rv_wallpapers);
         fab_backToTop = findViewById(R.id.fab_goToTop);
         fab_getRandomizeWallpaper = findViewById(R.id.fab_getRandomWallpaper);
+
+        fl_container = findViewById(R.id.fl_container);
+
+        anim_fromBottom = AnimationUtils.loadAnimation(this, R.anim.from_bottom_fab_anim);
+        anim_toBottom = AnimationUtils.loadAnimation(this, R.anim.to_bottom_fab_anim);
 
         toolbar.setTitle("");
 
@@ -85,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             rv_wallpapers.smoothScrollToPosition(0);
         });
 
+
         fab_getRandomizeWallpaper.setOnClickListener(v -> {
             Collections.shuffle(wallpaperList);
             adapter.notifyDataSetChanged();
@@ -105,11 +121,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     if (Math.abs(y1 - y0) < 800 && y1 - y0 < 1 && !isUp[0]) {
                         Log.d("Y", "up");
                         isUp[0] = true;
-                        increaseFabs();
+//                        increaseFabs();
+                        fl_container.startAnimation(anim_fromBottom);
                     } else if (y1 - y0 > 1 && isUp[0]) {
                         Log.d("Y", "down");
                         isUp[0] = false;
-                        decreaseFabs();
+//                        decreaseFabs();
+                        fl_container.startAnimation(anim_toBottom);
                     }
                     y1 = event.getY();
                 }
@@ -117,6 +135,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 return false;
             }
         });
+
+//        rv_wallpapers.addOnScrollListener(new RecyclerView.OnScrollListener() {
+//            @Override
+//            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+//                if (dy > 0) {
+//                    fl_container.startAnimation(anim_fromBottom);
+//                } else if (dy < 0) {
+//                    //Scrolling up
+//                    fl_container.startAnimation(anim_toBottom);
+//                }
+//
+//
+//            }
+//        });
+
+
     }
 
     private void decreaseFabs() {

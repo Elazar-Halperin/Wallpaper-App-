@@ -1,5 +1,6 @@
 package com.example.wallpapaerapp_darkifycopy;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.WallpaperManager;
@@ -12,35 +13,31 @@ import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.ParcelFileDescriptor;
-import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.squareup.picasso.Picasso;
 
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URI;
 import java.net.URL;
 import java.util.Locale;
 
 public class SetUpWallpaperActivity extends AppCompatActivity {
+    public static final int DELETE_REQUEST_CODE = 1;
     Animation anim_rotateOpen;
     Animation anim_rotateClose;
     Animation anim_fromBottom;
@@ -58,6 +55,10 @@ public class SetUpWallpaperActivity extends AppCompatActivity {
 
     private boolean clicked;
 
+    ContentResolver contentResolver;
+    Uri imageContentUri;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,6 +71,7 @@ public class SetUpWallpaperActivity extends AppCompatActivity {
         fab_share = findViewById(R.id.fab_share);
 
         iv_wallpaper = findViewById(R.id.iv_wallpaper);
+
 
         anim_rotateOpen = AnimationUtils.loadAnimation(this, R.anim.rotate_open_anim);
         anim_rotateClose = AnimationUtils.loadAnimation(this, R.anim.roatate_close_anim);
@@ -103,7 +105,7 @@ public class SetUpWallpaperActivity extends AppCompatActivity {
         });
 
         fab_saveToGallery.setOnClickListener(v -> {
-            showMessage("Saved to gallery!");
+            saveWallpaperToGallery();
         });
     }
 
@@ -118,10 +120,10 @@ public class SetUpWallpaperActivity extends AppCompatActivity {
         BitmapDrawable drawable = (BitmapDrawable) iv_wallpaper.getDrawable();
         Bitmap image = drawable.getBitmap();
 
-        ContentResolver contentResolver = getApplicationContext().getContentResolver();
+        contentResolver = getApplicationContext().getContentResolver();
         ContentValues newImageDetails = new ContentValues();
         newImageDetails.put(MediaStore.Images.Media.DISPLAY_NAME, "Image." + System.currentTimeMillis() + ".png");
-        Uri imageContentUri = contentResolver.insert(contentUri, newImageDetails);
+        imageContentUri = contentResolver.insert(contentUri, newImageDetails);
 
         try (ParcelFileDescriptor fileDescriptor =
                      contentResolver.openFileDescriptor(imageContentUri, "w", null)) {
@@ -131,6 +133,8 @@ public class SetUpWallpaperActivity extends AppCompatActivity {
             image.compress(Bitmap.CompressFormat.JPEG, 50, bufferedOutputStream);
             bufferedOutputStream.flush();
             bufferedOutputStream.close();
+
+
         } catch (IOException e) {
             Log.e("errorrr", "Error saving bitmap", e);
         }
@@ -142,87 +146,19 @@ public class SetUpWallpaperActivity extends AppCompatActivity {
         sendIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         sendIntent.setType("image/*");
         Intent shareIntent = Intent.createChooser(sendIntent, "Share with");
-        startActivity(shareIntent);
+        startActivityForResult(shareIntent, DELETE_REQUEST_CODE);
 
 
-
-//        try {
-//            if(!url.contains("http")) {
-//                final String pureBase64Encoded = url.substring(url.indexOf(",") + 1);
-//                byte[] decodedString = Base64.decode(pureBase64Encoded, Base64.DEFAULT);
-//                bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-//            } else {
-//                URL urlObject = new URL(url);
-//                bitmap = BitmapFactory.decodeStream(urlObject.openConnection().getInputStream());
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
-//        StrictMode.setVmPolicy(builder.build());
-//
-//        BitmapDrawable drawable = (BitmapDrawable) iv_wallpaper.getDrawable();
-//        Bitmap image = drawable.getBitmap();
-//
-//        File file = new File(getExternalCacheDir() +"/" + getResources().getString(R.string.app_name) + ".png");
-//        Intent shareInt = null;
-//
-//        try {
-//            FileOutputStream fileOutputStream = new FileOutputStream(file);
-//            image.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
-//
-//            fileOutputStream.flush();
-//            fileOutputStream.close();
-//
-//            if(file.exists()) {
-//                shareInt = new Intent(Intent.ACTION_SEND);
-//                shareInt.setType("image/*");
-//                shareInt.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
-//                shareInt.putExtra(Intent.EXTRA_TEXT, "hello");
-//                shareInt.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//            } else {
-//                Toast.makeText(getApplicationContext(), "Can't share this wallpaper", Toast.LENGTH_SHORT).show();
-//            }
-//
-//
-//
-//        } catch (Exception e) {
-//
-//        }
-//
-//        startActivity(Intent.createChooser(shareInt,"Share wallpaper"));
-
-
-
-//        Log.d("bitmap", bitmap.toString());
-//        Intent share = new Intent(Intent.ACTION_SEND);
-//        share.setType("image/*");
-//        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-//        icon.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-//        File f = new File(Environment.getExternalStorageDirectory() + File.separator + "temporary_file.jpg");
-//        String path = "";
-//        try {
-//            f.createNewFile();
-//            FileOutputStream fo = new FileOutputStream(f);
-//            fo.write(bytes.toByteArray());
-//            path = f.getPath();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        Log.d("path", path);
-//        share.putExtra(Intent.EXTRA_STREAM, Uri.parse(Environment.getExternalStorageDirectory() + File.separator + "temporary_file.jpg"));
-//        startActivity(Intent.createChooser(share, "Share Image"));
     }
 
-    private Bitmap.CompressFormat getCompressFormat(String ext) {
-        switch (ext.toLowerCase(Locale.ROOT)) {
-            case ".png":
-                return Bitmap.CompressFormat.PNG;
-            case ".jpeg":
-                return Bitmap.CompressFormat.JPEG;
-            default:
-                return Bitmap.CompressFormat.JPEG;
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == DELETE_REQUEST_CODE) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                contentResolver.delete(imageContentUri, null);
+            }
         }
     }
 
@@ -232,8 +168,8 @@ public class SetUpWallpaperActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     try {
-                        if(!url.contains("http")) {
-                            final String pureBase64Encoded = url.substring(url.indexOf(",") + 1);
+                        if (!url.contains("http")) {
+                            final String pureBase64Encoded = url.substring(url.indexOf(",") + DELETE_REQUEST_CODE);
                             byte[] decodedString = Base64.decode(pureBase64Encoded, Base64.DEFAULT);
                             bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
                             wallpaperManager.setBitmap(bitmap);
@@ -252,6 +188,41 @@ public class SetUpWallpaperActivity extends AppCompatActivity {
 
         } catch (Exception e) {
             e.printStackTrace();
+        }
+
+    }
+
+    private void saveWallpaperToGallery() {
+        Uri contentUri;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            contentUri = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
+        } else {
+            contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        }
+
+        BitmapDrawable drawable = (BitmapDrawable) iv_wallpaper.getDrawable();
+        Bitmap image = drawable.getBitmap();
+
+        ContentResolver cr = getApplicationContext().getContentResolver();
+        ContentValues newImageDetails = new ContentValues();
+        newImageDetails.put(MediaStore.Images.Media.DISPLAY_NAME, "Image." + System.currentTimeMillis() + ".png");
+        Uri uri = cr.insert(contentUri, newImageDetails);
+
+        try (ParcelFileDescriptor fileDescriptor =
+                     cr.openFileDescriptor(uri, "w", null)) {
+            FileDescriptor fd = fileDescriptor.getFileDescriptor();
+            OutputStream outputStream = new FileOutputStream(fd);
+            BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
+            image.compress(Bitmap.CompressFormat.JPEG, 50, bufferedOutputStream);
+            bufferedOutputStream.flush();
+            bufferedOutputStream.close();
+
+            Toast.makeText(getApplicationContext(), "Saved successfully", Toast.LENGTH_SHORT).show();
+
+
+        } catch (IOException e) {
+            Log.e("errorrr", "Error saving bitmap", e);
+            Toast.makeText(getApplicationContext(), "Failed to save the wallpaper, try again.", Toast.LENGTH_SHORT).show();
         }
 
     }
