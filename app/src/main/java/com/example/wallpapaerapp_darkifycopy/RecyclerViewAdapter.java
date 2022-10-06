@@ -2,12 +2,14 @@ package com.example.wallpapaerapp_darkifycopy;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,7 +21,9 @@ import java.util.Collection;
 import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.viewHolder> implements Filterable {
-    public static final String WALLPAPER_URL = "Wallpaper Url";
+    public static final String WALLPAPER = "Wallpaper";
+    public static final String FAVORITES = "Favorites";
+    public static final String ALL = "All";
     Context context;
     List<Wallpaper> wallpaperListFull;
     List<Wallpaper> wallpaperList;
@@ -49,7 +53,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         iv_wallpaper.setAlpha(0f);
 
         Glide.with(context)
-                .load(wallpaperListFull.get(position).getUrl())
+                .load(wallpaperList.get(position).getUrl())
                 .into(iv_wallpaper);
 
         iv_wallpaper.animate()
@@ -60,14 +64,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         iv_wallpaper.setOnClickListener(v -> {
             Intent i = new Intent(context, SetUpWallpaperActivity.class);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            i.putExtra(WALLPAPER_URL, wallpaperListFull.get(position).getUrl());
+            i.putExtra(WALLPAPER, wallpaperList.get(position));
             context.startActivity(i);
         });
     }
 
     @Override
     public int getItemCount() {
-        return wallpaperListFull.size();
+        return wallpaperList.size();
     }
 
     @Override
@@ -78,9 +82,16 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private Filter wallpaperFilter = new Filter() {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
-            List<Wallpaper> favorites = new ArrayList<>(database.getAllFavorites());
+            String choice = constraint.toString();
+            List<Wallpaper> list = new ArrayList<>();
+            if (choice.equals(FAVORITES)) {
+                list.addAll(database.getAllFavorites());
+            }
+            if(choice.equals(ALL)) {
+                list.addAll(database.getAllWallpapersShuffled());
+            }
             FilterResults filterResults = new FilterResults();
-            filterResults.values = favorites;
+            filterResults.values = list;
 
             return filterResults;
 
@@ -89,7 +100,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
             wallpaperList.clear();
-            wallpaperList.addAll((List)results.values);
+            wallpaperList.addAll((Collection<? extends Wallpaper>) results.values);
+
             notifyDataSetChanged();
         }
     };

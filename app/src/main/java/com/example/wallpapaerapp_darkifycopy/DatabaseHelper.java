@@ -66,7 +66,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         cv.put(ID_WALLPAPER, wallpaper.getId());
 
-        boolean inserted =  db.insert(WALLPAPERS, null, cv) > 0;
+        boolean inserted =  db.insert(FAVORITES, null, cv) > 0;
 
         db.close();
 
@@ -162,4 +162,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return isFavorite;
     }
+
+
 }

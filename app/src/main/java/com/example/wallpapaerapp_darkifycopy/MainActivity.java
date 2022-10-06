@@ -83,9 +83,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
         wallpaperList = database.getAllWallpapersShuffled();
-//        database.insertWallpaper(new Wallpaper(0, "https://wallpapercave.com/wp/wp5483004.jpg"));
-//        database.insertWallpaper(new Wallpaper(0, "https://wallpaperaccess.com/full/1489795.jpg"));
-//        database.insertWallpaper(new Wallpaper(0, "https://phonewallpaperhd.com/wp-content/uploads/2019/02/Liquid-Art-Wallpaper-For-Phone-HD.jpg"));
         adapter = new RecyclerViewAdapter(getApplicationContext(), wallpaperList);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         rv_wallpapers.setAdapter(adapter);
@@ -117,8 +114,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if (event.getAction() == MotionEvent.ACTION_MOVE) {
                     y0 = event.getY();
                     Log.d("Yaxis", y0 +"");
-//                    if (Math.abs(y1 - y0) < 1000) return false;
-                    if (Math.abs(y1 - y0) < 800 && y1 - y0 < 1 && !isUp[0]) {
+                    if (Math.abs(y1 - y0) < 1000) return false;
+                    if (y1 - y0 < 1 && !isUp[0]) {
                         Log.d("Y", "up");
                         isUp[0] = true;
 //                        increaseFabs();
@@ -229,9 +226,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer.closeDrawer(GravityCompat.START);
         switch (item.getItemId()) {
             case R.id.nav_wallpapers:
+                adapter.getFilter().filter(RecyclerViewAdapter.ALL);
                 break;
             case R.id.nav_favorites:
-                adapter.getFilter().filter("");
+                adapter.getFilter().filter(RecyclerViewAdapter.FAVORITES);
                 break;
             case R.id.nav_shareApp:
                 break;

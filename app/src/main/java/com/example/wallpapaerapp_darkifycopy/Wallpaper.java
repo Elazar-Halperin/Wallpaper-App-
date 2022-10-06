@@ -1,6 +1,8 @@
 package com.example.wallpapaerapp_darkifycopy;
 
-public class Wallpaper {
+import java.io.Serializable;
+
+public class Wallpaper implements Serializable {
     int id;
     String url;
 

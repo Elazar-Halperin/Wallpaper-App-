@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,8 +21,10 @@ import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ThemedSpinnerAdapter;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -42,18 +45,27 @@ public class SetUpWallpaperActivity extends AppCompatActivity {
     Animation anim_rotateClose;
     Animation anim_fromBottom;
     Animation anim_toBottom;
+    Animation anim_clicked_start;
+    Animation anim_clicked_end;
+
+    long clicked_anim_duration;
 
     FloatingActionButton fab_addToFavorite, fab_expand, fab_saveToGallery, fab_setAsWallpaper, fab_share;
 
     ImageView iv_wallpaper;
 
+    DatabaseHelper database;
+
     WallpaperManager wallpaperManager;
+
+    Wallpaper wallpaper;
 
     String url;
 
     Bitmap bitmap;
 
     private boolean clicked;
+    private boolean isFavorite;
 
     ContentResolver contentResolver;
     Uri imageContentUri;
@@ -72,17 +84,28 @@ public class SetUpWallpaperActivity extends AppCompatActivity {
 
         iv_wallpaper = findViewById(R.id.iv_wallpaper);
 
-
         anim_rotateOpen = AnimationUtils.loadAnimation(this, R.anim.rotate_open_anim);
         anim_rotateClose = AnimationUtils.loadAnimation(this, R.anim.roatate_close_anim);
         anim_fromBottom = AnimationUtils.loadAnimation(this, R.anim.from_bottom_anim);
         anim_toBottom = AnimationUtils.loadAnimation(this, R.anim.to_bottom_anim);
+        anim_clicked_start = AnimationUtils.loadAnimation(this, R.anim.rotate_clicked_start_anim);
+        anim_clicked_end = AnimationUtils.loadAnimation(this, R.anim.rotate_clicked_end_anim);
+
+        clicked_anim_duration = anim_clicked_start.getDuration();
 
         wallpaperManager = WallpaperManager.getInstance(getApplicationContext());
 
-        setListeners();
+        database = new DatabaseHelper(getApplicationContext());
 
-        url = getIntent().getStringExtra(RecyclerViewAdapter.WALLPAPER_URL);
+        wallpaper = (Wallpaper) getIntent().getSerializableExtra(RecyclerViewAdapter.WALLPAPER);
+
+        isFavorite = database.isInFavorites(wallpaper);
+
+        changeDrawable(fab_addToFavorite, isFavorite ? R.drawable.favorite_24 : R.drawable.favorite_outlined_24px);
+
+        url = wallpaper.getUrl();
+
+        setListeners();
 
         Glide.with(getApplicationContext())
                 .load(url)
@@ -107,6 +130,41 @@ public class SetUpWallpaperActivity extends AppCompatActivity {
         fab_saveToGallery.setOnClickListener(v -> {
             saveWallpaperToGallery();
         });
+
+        fab_addToFavorite.setOnClickListener(v -> {
+            addWallpaperToFavorites();
+        });
+    }
+
+    private void addWallpaperToFavorites() {
+        boolean inserted = false;
+        if (isFavorite) {
+            database.removeFromFavorites(wallpaper);
+        } else {
+            inserted = database.insertToFavorites(wallpaper);
+        }
+
+        changeDrawable(fab_addToFavorite, !isFavorite && inserted ? R.drawable.favorite_24 : R.drawable.favorite_outlined_24px);
+        isFavorite = !isFavorite;
+
+    }
+
+    private void changeDrawable(FloatingActionButton fab, int draw_code) {
+        Drawable drawable = getDrawable(draw_code);
+
+
+        fab.startAnimation(anim_clicked_start);
+
+        try {
+            Thread.sleep(clicked_anim_duration);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        fab.setImageDrawable(drawable);
+
+        fab.startAnimation(anim_clicked_end);
+
     }
 
     private void shareWallpaper() {
